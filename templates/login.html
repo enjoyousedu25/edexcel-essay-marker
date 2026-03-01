@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Teacher login</h1>
+  <p class="muted">Enter the passcode to use the marking tool.</p>
+
+  {% if error %}
+    <div class="alert">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/login" class="form">
+    <label>
+      Your name (optional)
+      <input type="text" name="teacher_name" placeholder="e.g., Ms Lim">
+    </label>
+    <label>
+      Passcode
+      <input type="password" name="passcode" required>
+    </label>
+    <button class="btn" type="submit">Login</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Upload an essay</h1>
+  <p class="muted">Accepted: PDF / JPEG / PNG. The app will extract text and mark using AO4 & AO5.</p>
+
+  <form method="post" action="/mark" enctype="multipart/form-data" class="form">
+    <label>
+      Task brief (recommended)
+      <textarea name="task_brief" rows="4" placeholder="Paste the question / purpose / audience / form here."></textarea>
+    </label>
+
+    <label>
+      Essay file
+      <input type="file" name="file" accept="application/pdf,image/jpeg,image/png" required>
+    </label>
+
+    <button class="btn" type="submit">Mark essay</button>
+  </form>
+
+  <div class="hint">
+    <strong>Tip:</strong> For scanned PDFs, make sure the text is clear and not skewed.
+  </div>
+{% endblock %}

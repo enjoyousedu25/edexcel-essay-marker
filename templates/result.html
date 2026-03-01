@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Results</h1>
+
+  <div class="grid2">
+    <div>
+      <div class="kv"><span>File</span><span>{{ filename }}</span></div>
+      <div class="kv"><span>Text extraction</span><span>{{ extract_method }}</span></div>
+      <div class="kv"><span>Mode</span><span>{{ result.mode }}</span></div>
+      {% if result.model %}
+        <div class="kv"><span>Model</span><span>{{ result.model }}</span></div>
+      {% endif %}
+      {% if result.warning %}
+        <div class="alert">{{ result.warning }}</div>
+      {% endif %}
+      {% if result.error %}
+        <div class="alert">{{ result.error }}</div>
+      {% endif %}
+    </div>
+    <div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+  <a class="btn secondary" href="/upload">Mark another essay</a>
+  {% if report_id %}
+    <a class="btn" href="/export/pdf/{{ report_id }}">Download PDF</a>
+    <a class="btn secondary" href="/export/csv/{{ report_id }}">Download CSV</a>
+  {% endif %}
+</div>
+
+    </div>
+  </div>
+
+  {% if task_brief %}
+    <h2>Task brief</h2>
+    <pre class="pre">{{ task_brief }}</pre>
+  {% endif %}
+
+  {% if result.mode == "ai" %}
+    <h2>Overall summary</h2>
+    <p>{{ result.overall_summary }}</p>
+
+    <h2>Aspect scores</h2>
+    <table class="table">
+      <thead>
+        <tr><th>AO</th><th>Level</th><th>Mark</th><th>Justification</th></tr>
+      </thead>
+      <tbody>
+        {% for s in result.aspect_scores %}
+          <tr>
+            <td><strong>{{ s.code }}</strong></td>
+            <td>{{ s.level }}</td>
+            <td>{{ s.mark }}</td>
+            <td>{{ s.justification }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Strengths & targets</h2>
+    {% for s in result.aspect_scores %}
+      <div class="box">
+        <div class="box-title">{{ s.code }} – strengths</div>
+        <ul>
+          {% for item in s.strengths %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        <div class="box-title">{{ s.code }} – targets</div>
+        <ul>
+          {% for item in s.targets %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+
+    <h2>In-context (sentence-by-sentence)</h2>
+<p class="muted">
+  Sentences highlighted below were flagged for improvement.
+  {% if sentences_truncated %} (Note: display limited to first 120 sentences.){% endif %}
+</p>
+
+{% if result.sentence_feedback %}
+  <div class="essay">
+    {{ highlighted_html | safe }}
+  </div>
+
+  <h3>Flagged sentences</h3>
+  <table class="table">
+    <thead>
+      <tr><th>#</th><th>Issues</th><th>Improved sentence</th></tr>
+    </thead>
+    <tbody>
+      {% for item in result.sentence_feedback %}
+        <tr>
+          <td><a href="#s{{ item.sentence_index }}">{{ item.sentence_index }}</a></td>
+          <td class="small">
+            <ul class="compact">
+              {% for it in item.issues %}
+                <li>{{ it }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+          <td class="small">{{ item.improved_sentence }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="muted">No sentence-level flags returned.</div>
+{% endif %}
+
+
+<h2>Mistakes / improvements (top issues)</h2>
+    <table class="table">
+      <thead>
+        <tr><th>Category</th><th>Snippet</th><th>What’s wrong</th><th>Improved version</th></tr>
+      </thead>
+      <tbody>
+        {% for m in result.mistakes %}
+          <tr>
+            <td>{{ m.category }}</td>
+            <td class="small"><em>{{ m.quote_snippet }}</em></td>
+            <td class="small">{{ m.what_is_wrong }}</td>
+            <td class="small">{{ m.improved_version }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Improvement plan (next steps)</h2>
+    <ol>
+      {% for step in result.improvement_plan %}
+        <li>{{ step }}</li>
+      {% endfor %}
+    </ol>
+
+    <div class="muted">Confidence: {{ result.confidence }}</div>
+
+  {% elif result.mode.startswith("basic") %}
+    <h2>Basic feedback (no AI key detected)</h2>
+    <p class="muted">Set <code>OPENAI_API_KEY</code> to enable rubric-based marking + detailed feedback.</p>
+
+    <h3>Readability</h3>
+    <pre class="pre">{{ result.readability | tojson(indent=2) }}</pre>
+
+    <h3>Possible misspellings</h3>
+    <table class="table">
+      <thead><tr><th>Word</th><th>Suggestion</th></tr></thead>
+      <tbody>
+      {% for s in result.spelling.possible_misspellings %}
+        <tr><td>{{ s.word }}</td><td>{{ s.suggestion }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <h3>General improvements</h3>
+    <ul>
+      {% for i in result.improvements %}
+        <li>{{ i }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <h2>Extracted text (preview)</h2>
+  <pre class="pre">{{ essay_text }}</pre>
+{% endblock %}

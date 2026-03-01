@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edexcel Essay Marker</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <div class="brand">Edexcel Essay Marker</div>
+        <div class="subtitle">Passcode-protected teacher marking assistant</div>
+      </div>
+      <div>
+        {% if teacher %}
+          <form method="post" action="/logout">
+            <button class="btn secondary" type="submit">Logout ({{ teacher }})</button>
+          </form>
+        {% endif %}
+      </div>
+    </header>
+    <main class="card">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+      <div>Guidance only • Review before final grading</div>
+    </footer>
+  </div>
+</body>
+</html>
