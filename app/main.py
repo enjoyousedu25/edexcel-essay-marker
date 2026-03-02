@@ -96,31 +96,19 @@ async def mark_essay(
 
     result = score_essay(text, task_brief=task_brief)
 
-# Sentence highlighting (AI mode provides sentence_feedback indices)
-sentences = split_sentences(text, max_sentences=120)
-feedback = (result.get("sentence_feedback") or []) if isinstance(result, dict) else []
-highlighted_html = build_highlighted_html(sentences, feedback)
+    # Sentence highlighting (AI mode provides sentence_feedback indices)
+    sentences = split_sentences(text, max_sentences=120)
+    feedback = (result.get("sentence_feedback") or []) if isinstance(result, dict) else []
+    highlighted_html = build_highlighted_html(sentences, feedback)
 
-report_id = cache_put({
-    "meta": {"filename": file.filename, "extract_method": method},
-    "task_brief": task_brief,
-    "essay_text": text,
-    "result": result,
-})
+    report_id = cache_put({
+        "meta": {"filename": file.filename, "extract_method": method},
+        "task_brief": task_brief,
+        "essay_text": text,
+        "result": result,
+    })
 
-return templates.TemplateResponse("result.html", {
-    "request": request,
-    "teacher": teacher,
-    "filename": file.filename,
-    "extract_method": method,
-    "task_brief": task_brief,
-    "essay_text": text[:8000],  # avoid huge HTML
-    "result": result,
-    "report_id": report_id,
-    "highlighted_html": highlighted_html,
-    "sentences_truncated": (len(split_sentences(text, max_sentences=9999)) > 120),
-})
-("result.html", {
+    return templates.TemplateResponse("result.html", {
         "request": request,
         "teacher": teacher,
         "filename": file.filename,
@@ -128,6 +116,9 @@ return templates.TemplateResponse("result.html", {
         "task_brief": task_brief,
         "essay_text": text[:8000],  # avoid huge HTML
         "result": result,
+        "report_id": report_id,
+        "highlighted_html": highlighted_html,
+        "sentences_truncated": (len(split_sentences(text, max_sentences=9999)) > 120),
     })
 
 @app.get("/export/pdf/{report_id}")
